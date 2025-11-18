@@ -430,4 +430,3 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
     </div>
   )
 }
-
