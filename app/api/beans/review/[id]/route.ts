@@ -27,10 +27,13 @@ export async function POST(
     }
 
     if (action === 'approve') {
-      // Process flavor notes
-      const flavorNotes = data.flavor_notes
-        ? data.flavor_notes.split(',').map((note: string) => note.trim()).filter(Boolean)
-        : null
+      // Process flavor notes - handle both array and comma-separated string
+      let flavorNotes: string[] | null = null
+      if (Array.isArray(data.flavor_notes)) {
+        flavorNotes = data.flavor_notes.filter((n: any) => n && n.trim())
+      } else if (typeof data.flavor_notes === 'string') {
+        flavorNotes = data.flavor_notes.split(',').map((note: string) => note.trim()).filter(Boolean)
+      }
 
       // Prepare update data
       const updateData: any = {
@@ -45,15 +48,26 @@ export async function POST(
         producer: data.producer || null,
         variety: data.variety || null,
         process_method: data.process_method || null,
-        grade: data.grade || null,
-        altitude_min_m: data.altitude_min_m ? parseInt(data.altitude_min_m) : null,
-        altitude_max_m: data.altitude_max_m ? parseInt(data.altitude_max_m) : null,
-        harvest_season: data.harvest_season || null,
+        altitude_min_m: typeof data.altitude_min_m === 'number' ? data.altitude_min_m : (data.altitude_min_m ? parseInt(data.altitude_min_m) : null),
+        altitude_max_m: typeof data.altitude_max_m === 'number' ? data.altitude_max_m : (data.altitude_max_m ? parseInt(data.altitude_max_m) : null),
         flavor_notes: flavorNotes,
         vendor_description: data.vendor_description || null,
         roasting_notes: data.roasting_notes || null,
-        price_per_lb: data.price_per_lb ? parseFloat(data.price_per_lb) : null,
-        espresso_suitable: data.espresso_suitable || false,
+        recommended_roast_levels: Array.isArray(data.recommended_roast_levels) ? data.recommended_roast_levels : null,
+        body_intensity: (() => {
+          const value = typeof data.body_intensity === 'number' ? data.body_intensity : (data.body_intensity ? parseInt(data.body_intensity) : null)
+          return (value !== null && value >= 0 && value <= 5) ? value : null
+        })(),
+        acidity_intensity: (() => {
+          const value = typeof data.acidity_intensity === 'number' ? data.acidity_intensity : (data.acidity_intensity ? parseInt(data.acidity_intensity) : null)
+          return (value !== null && value >= 0 && value <= 5) ? value : null
+        })(),
+        price_per_lb: typeof data.price_per_lb === 'number' ? data.price_per_lb : (data.price_per_lb ? parseFloat(data.price_per_lb) : null),
+        arrival_date: data.arrival_date || null,
+        screen_size: data.screen_size || null,
+        cupping_score: typeof data.cupping_score === 'number' ? data.cupping_score : (data.cupping_score ? parseFloat(data.cupping_score) : null),
+        bean_type: data.bean_type || null,
+        espresso_suitable: data.espresso_suitable === true || data.espresso_suitable === 'yes' ? true : data.espresso_suitable === false || data.espresso_suitable === 'no' ? false : null,
         updated_at: new Date().toISOString(),
       }
 

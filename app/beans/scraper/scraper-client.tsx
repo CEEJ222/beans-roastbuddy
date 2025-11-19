@@ -72,7 +72,18 @@ export default function ScraperClient() {
         })
 
         const data = await response.json()
-        scrapeResults.push(data)
+        
+        // Check if the response indicates success or failure
+        if (!response.ok || !data.success) {
+          scrapeResults.push({
+            success: false,
+            message: data.message || 'Failed to scrape profile',
+            error: data.error || `HTTP ${response.status}`,
+          })
+        } else {
+          scrapeResults.push(data)
+        }
+        
         setResults([...scrapeResults])
       } catch (error) {
         scrapeResults.push({

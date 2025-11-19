@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { Nav } from '@/components/nav'
+import { Sidebar } from '@/components/sidebar'
 
 export const metadata: Metadata = {
   title: 'Beans Admin - Roast Buddy',
@@ -14,9 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Nav />
-        {children}
+      <body className="flex">
+        <Sidebar />
+        <main className="flex-1 lg:ml-0 min-h-screen">
+          {children}
+        </main>
       </body>
     </html>
   )

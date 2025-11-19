@@ -1,7 +1,6 @@
 import { requireAdmin } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { notFound, redirect } from 'next/navigation'
-import ReviewDetailClient from './review-detail-client'
+import AllBeansClient from './all-beans-client'
 
 interface CoffeeProfile {
   id: string
@@ -20,13 +19,7 @@ interface CoffeeProfile {
   flavor_notes: string[] | null
   vendor_description: string | null
   roasting_notes: string | null
-  recommended_roast_levels: string[] | null
-  body_intensity: number | null
-  acidity_intensity: number | null
   price_per_lb: number | null
-  arrival_date: string | null
-  screen_size: string | null
-  cupping_score: number | null
   bean_type: string | null
   espresso_suitable: boolean | null
   status: string
@@ -34,26 +27,19 @@ interface CoffeeProfile {
   scraped_at: string | null
 }
 
-export default async function ReviewDetailPage({ params }: { params: { id: string } }) {
+export default async function AllBeansPage() {
   const { supabase } = await requireAdmin()
 
-  const { data: profile, error } = await supabase
+  const { data: profiles, error } = await supabase
     .from('vendor_coffee_catalog')
     .select('*')
-    .eq('id', params.id)
-    .single()
+    .order('created_at', { ascending: false })
 
-  if (error || !profile) {
-    notFound()
+  if (error) {
+    console.error('Error fetching profiles:', error)
   }
 
-  const profileData = profile as CoffeeProfile
+  const profilesList = (profiles || []) as CoffeeProfile[]
 
-  // If already reviewed, redirect to review queue
-  if (profileData.status !== 'pending') {
-    redirect('/beans/review')
-  }
-
-  return <ReviewDetailClient profile={profileData} />
+  return <AllBeansClient initialProfiles={profilesList} />
 }
-

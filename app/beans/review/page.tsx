@@ -4,10 +4,14 @@ import Link from 'next/link'
 
 interface CoffeeProfile {
   id: string
-  name: string
-  vendor: string
+  name: string | null
+  vendor: string | null
   price_per_lb: number | null
   country: string | null
+  process_method: string | null
+  cupping_score: number | null
+  recommended_roast_levels: string[] | null
+  scraped_at: string | null
   status: string
   created_at: string
 }
@@ -42,7 +46,7 @@ export default async function ReviewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-8 px-4">
+      <div className="max-w-6xl mx-auto py-8 px-4 lg:px-8 pt-16 lg:pt-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Review Queue</h1>
@@ -54,7 +58,7 @@ export default async function ReviewPage() {
             href="/beans/scraper"
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
-            + Scrape New Profile
+            + Add New Profile
           </Link>
         </div>
 
@@ -65,7 +69,7 @@ export default async function ReviewPage() {
               href="/beans/scraper"
               className="mt-4 inline-block text-indigo-600 hover:text-indigo-700"
             >
-              Scrape your first profile →
+              Add green coffee profile →
             </Link>
           </div>
         ) : (
@@ -79,12 +83,35 @@ export default async function ReviewPage() {
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">
                   {profile.name || 'Unnamed Coffee'}
                 </h3>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <div>{profile.vendor}</div>
+                <div className="space-y-1 text-sm text-gray-600 mb-3">
+                  {profile.vendor && <div>{profile.vendor}</div>}
                   {profile.price_per_lb && (
-                    <div>${profile.price_per_lb.toFixed(2)}/lb</div>
+                    <div className="font-medium">${profile.price_per_lb.toFixed(2)}/lb</div>
                   )}
-                  {profile.country && <div>{profile.country}</div>}
+                  {profile.country && profile.process_method && (
+                    <div>{profile.country} • {profile.process_method}</div>
+                  )}
+                  {profile.country && !profile.process_method && <div>{profile.country}</div>}
+                  {!profile.country && profile.process_method && <div>{profile.process_method}</div>}
+                </div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {profile.cupping_score && (
+                    <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
+                      Score: {profile.cupping_score}
+                    </span>
+                  )}
+                  {profile.recommended_roast_levels && profile.recommended_roast_levels.length > 0 && (
+                    <>
+                      {profile.recommended_roast_levels.slice(0, 3).map((level) => (
+                        <span
+                          key={level}
+                          className="inline-block px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded capitalize"
+                        >
+                          {level.replace('_', '+')}
+                        </span>
+                      ))}
+                    </>
+                  )}
                 </div>
                 <div className="mt-4 pt-4 border-t">
                   <span className="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
