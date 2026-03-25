@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Sidebar } from '@/components/sidebar'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Beans Admin - Roast Buddy',
   description: 'Admin interface for coffee catalog management',
