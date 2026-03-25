@@ -6,7 +6,7 @@ export default function UnauthorizedPage() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow text-center">
         <h1 className="text-3xl font-bold text-gray-900">Unauthorized</h1>
         <p className="text-gray-600">
-          You don't have permission to access this admin interface.
+          You don&apos;t have permission to access this admin interface.
         </p>
         <Link
           href="/login"
