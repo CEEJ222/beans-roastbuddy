@@ -1,9 +1,10 @@
-export interface VendorCoffeeProfile {
+/** Row shape for `vendor_coffee_catalog` (used by beans admin UI). */
+export interface CoffeeProfile {
   id: string
+  name: string | null
   vendor: string | null
   vendor_product_id: string | null
   vendor_url: string | null
-  name: string | null
   country: string | null
   region: string | null
   sub_region: string | null
@@ -19,17 +20,12 @@ export interface VendorCoffeeProfile {
   body_intensity: number | null
   acidity_intensity: number | null
   price_per_lb: number | null
-  bean_type: string | null
   arrival_date: string | null
   screen_size: string | null
   cupping_score: number | null
+  bean_type: string | null
   espresso_suitable: boolean | null
-  status: 'pending' | 'approved' | 'rejected'
-  reviewed_by: string | null
-  reviewed_at: string | null
-  rejection_reason: string | null
-  scraped_at: string | null
+  status: string
   created_at: string
-  updated_at: string
+  scraped_at: string | null
 }
-
