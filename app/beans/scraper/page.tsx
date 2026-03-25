@@ -1,6 +1,8 @@
 import { requireAdmin } from '@/lib/auth'
 import ScraperClient from './scraper-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ScraperPage() {
   await requireAdmin()
 

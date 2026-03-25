@@ -2,6 +2,8 @@ import { requireAdmin } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 interface CoffeeProfile {
   id: string
   name: string | null

@@ -2,6 +2,8 @@ import { requireAdmin } from '@/lib/auth'
 import type { CoffeeProfile } from '@/types/coffee'
 import AllBeansClient from './all-beans-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AllBeansPage() {
   const { supabase } = await requireAdmin()
 
