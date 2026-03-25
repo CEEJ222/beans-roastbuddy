@@ -15,7 +15,13 @@ export default function LoginPageClient() {
       const client = createClient()
       setSupabase(client)
     } catch (err) {
-      setError('Failed to initialize authentication. Please check your configuration.')
+      const message = err instanceof Error ? err.message : String(err)
+      console.error('[Beans admin] Supabase client init failed:', message)
+      setError(
+        message.includes('Missing Supabase')
+          ? 'Server is missing Supabase env vars. In Vercel → beans-roastbuddy → Settings → Environment Variables, set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY for Production, then redeploy.'
+          : 'Failed to initialize authentication. Please check your configuration.'
+      )
     }
   }, [])
 
