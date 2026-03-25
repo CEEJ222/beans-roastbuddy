@@ -3,8 +3,8 @@
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { LogOut, ExternalLink, Coffee, FileCheck, Database, Plus, Menu } from 'lucide-react'
-import { useRouter, usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
@@ -14,11 +14,18 @@ import {
 } from '@/components/ui/sheet'
 
 export function Sidebar() {
-  const router = useRouter()
   const pathname = usePathname()
   const [loading, setLoading] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const supabase = createClient()
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
+
+  useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch {
+      setSupabase(null)
+    }
+  }, [])
 
   // Don't show sidebar on login or unauthorized pages
   if (pathname === '/login' || pathname === '/unauthorized') {
@@ -26,6 +33,7 @@ export function Sidebar() {
   }
 
   const handleLogout = async () => {
+    if (!supabase) return
     setLoading(true)
     try {
       await supabase.auth.signOut()
