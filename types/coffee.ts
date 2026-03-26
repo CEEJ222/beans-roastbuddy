@@ -25,7 +25,11 @@ export interface CoffeeProfile {
   cupping_score: number | null
   bean_type: string | null
   espresso_suitable: boolean | null
-  status: string
+  status: 'pending' | 'approved' | 'rejected'
   created_at: string
   scraped_at: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  rejection_reason: string | null
+  updated_at: string
 }

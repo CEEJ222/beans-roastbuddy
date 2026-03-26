@@ -548,53 +548,48 @@ export default function BeanDetailModal({
         </CardContent>
       </Card>
 
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Flavor Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {editing ? (
-            <Input
-              value={formData.flavor_notes}
-              onChange={(e) => setFormData({ ...formData, flavor_notes: e.target.value })}
-              placeholder="chocolate, caramel, nutty (comma-separated)"
-              className="w-full"
-            />
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {profile.flavor_notes && profile.flavor_notes.length > 0 ? (
-                profile.flavor_notes.map((note, index) => (
-                  <Badge key={index} variant="secondary" className="text-sm">
-                    {note}
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-sm text-gray-500">None</span>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Description</CardTitle>
         </CardHeader>
-        <CardContent>
-          {editing ? (
-            <textarea
-              value={formData.vendor_description}
-              onChange={(e) => setFormData({ ...formData, vendor_description: e.target.value })}
-              placeholder="Vendor description"
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-          ) : (
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">
-              {profile.vendor_description || 'None'}
-            </p>
-          )}
+        <CardContent className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Flavor Notes (comma-separated)
+            </label>
+            {editing ? (
+              <Input
+                value={formData.flavor_notes}
+                onChange={(e) => setFormData({ ...formData, flavor_notes: e.target.value })}
+                placeholder="chocolate, caramel, nutty"
+                className="w-full"
+              />
+            ) : (
+              <div className="text-sm text-gray-700">
+                {profile.flavor_notes && profile.flavor_notes.length > 0
+                  ? profile.flavor_notes.join(', ')
+                  : 'None'}
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Farm Notes
+            </label>
+            {editing ? (
+              <textarea
+                value={formData.vendor_description}
+                onChange={(e) => setFormData({ ...formData, vendor_description: e.target.value })}
+                placeholder="Vendor description"
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              />
+            ) : (
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {profile.vendor_description || 'None'}
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

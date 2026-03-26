@@ -374,7 +374,7 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
             {/* Descriptions */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vendor Description
+                Farm Notes
               </label>
               <textarea
                 value={formData.vendor_description}
