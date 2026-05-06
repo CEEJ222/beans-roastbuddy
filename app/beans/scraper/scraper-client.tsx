@@ -10,12 +10,34 @@ interface ScrapeResult {
   error?: string
 }
 
+interface DiscoverItem {
+  url: string
+  alreadyExists: boolean
+}
+
+interface DiscoverResponse {
+  success: boolean
+  vendor?: string
+  vendorNotes?: string | null
+  total?: number
+  truncated?: boolean
+  items?: DiscoverItem[]
+  message?: string
+  error?: string
+}
+
+type Mode = 'single' | 'bulk' | 'listing'
+
 export default function ScraperClient() {
   const [singleUrl, setSingleUrl] = useState('')
   const [bulkUrls, setBulkUrls] = useState('')
-  const [mode, setMode] = useState<'single' | 'bulk'>('single')
+  const [listingUrl, setListingUrl] = useState('')
+  const [mode, setMode] = useState<Mode>('single')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<ScrapeResult[]>([])
+  const [discovered, setDiscovered] = useState<DiscoverResponse | null>(null)
+  const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set())
+  const [discoverError, setDiscoverError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSingleScrape = async (e: React.FormEvent) => {
@@ -34,7 +56,7 @@ export default function ScraperClient() {
 
       const data = await response.json()
       setResults([data])
-      
+
       if (data.success) {
         setSingleUrl('')
         setTimeout(() => {
@@ -52,16 +74,9 @@ export default function ScraperClient() {
     }
   }
 
-  const handleBulkScrape = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const urls = bulkUrls.split('\n').filter(url => url.trim())
-    if (urls.length === 0) return
-
-    setLoading(true)
-    setResults([])
-
+  const scrapeUrls = async (urls: string[]) => {
     const scrapeResults: ScrapeResult[] = []
-    
+
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i].trim()
       try {
@@ -72,8 +87,7 @@ export default function ScraperClient() {
         })
 
         const data = await response.json()
-        
-        // Check if the response indicates success or failure
+
         if (!response.ok || !data.success) {
           scrapeResults.push({
             success: false,
@@ -83,19 +97,85 @@ export default function ScraperClient() {
         } else {
           scrapeResults.push(data)
         }
-        
+
         setResults([...scrapeResults])
       } catch (error) {
         scrapeResults.push({
           success: false,
           message: `Failed to scrape: ${url}`,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         })
         setResults([...scrapeResults])
       }
     }
+  }
 
+  const handleBulkScrape = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const urls = bulkUrls.split('\n').filter(url => url.trim())
+    if (urls.length === 0) return
+
+    setLoading(true)
+    setResults([])
+    await scrapeUrls(urls)
     setLoading(false)
+  }
+
+  const handleDiscover = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!listingUrl.trim()) return
+
+    setLoading(true)
+    setDiscovered(null)
+    setDiscoverError(null)
+    setResults([])
+
+    try {
+      const response = await fetch('/api/beans/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: listingUrl }),
+      })
+      const data: DiscoverResponse = await response.json()
+
+      if (!response.ok || !data.success) {
+        setDiscoverError(data.error || data.message || `HTTP ${response.status}`)
+      } else {
+        setDiscovered(data)
+        // Default-select all NEW items (not already in catalog)
+        const fresh = (data.items || [])
+          .filter((it) => !it.alreadyExists)
+          .map((it) => it.url)
+        setSelectedUrls(new Set(fresh))
+      }
+    } catch (error) {
+      setDiscoverError(error instanceof Error ? error.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleScrapeSelected = async () => {
+    const urls = Array.from(selectedUrls)
+    if (urls.length === 0) return
+    setLoading(true)
+    setResults([])
+    await scrapeUrls(urls)
+    setLoading(false)
+  }
+
+  const toggleUrl = (url: string) => {
+    setSelectedUrls((prev) => {
+      const next = new Set(prev)
+      if (next.has(url)) next.delete(url)
+      else next.add(url)
+      return next
+    })
+  }
+
+  const toggleAll = (checked: boolean) => {
+    if (!discovered?.items) return
+    setSelectedUrls(checked ? new Set(discovered.items.map((it) => it.url)) : new Set())
   }
 
   const successCount = results.filter(r => r.success).length
@@ -124,6 +204,16 @@ export default function ScraperClient() {
           }`}
         >
           Bulk URLs
+        </button>
+        <button
+          onClick={() => setMode('listing')}
+          className={`px-4 py-2 rounded-md font-medium ${
+            mode === 'listing'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Listing URL
         </button>
       </div>
 
@@ -183,6 +273,102 @@ export default function ScraperClient() {
         </form>
       )}
 
+      {/* Listing URL Form */}
+      {mode === 'listing' && (
+        <div className="space-y-4">
+          <form onSubmit={handleDiscover} className="space-y-4">
+            <div>
+              <label htmlFor="listing-url" className="block text-sm font-medium text-gray-700 mb-2">
+                Listing / collection / category page URL
+              </label>
+              <input
+                id="listing-url"
+                type="url"
+                value={listingUrl}
+                onChange={(e) => setListingUrl(e.target.value)}
+                placeholder="https://www.sweetmarias.com/green-coffee/latest-additions.html"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                required
+                disabled={loading}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Paste a vendor listing/collection page. We&apos;ll find the product URLs and let you choose which to scrape.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !listingUrl.trim() || results.length > 0}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading && !discovered ? 'Discovering...' : 'Discover Products'}
+            </button>
+          </form>
+
+          {discoverError && (
+            <div className="p-3 rounded-md text-sm bg-red-50 text-red-800">
+              ✗ {discoverError}
+            </div>
+          )}
+
+          {discovered?.items && (
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-gray-900">
+                    {discovered.vendor} — found {discovered.total} product{discovered.total === 1 ? '' : 's'}
+                    {discovered.truncated && ' (capped at 100)'}
+                  </div>
+                  {discovered.vendorNotes && (
+                    <div className="text-xs text-amber-700 mt-1">⚠ {discovered.vendorNotes}</div>
+                  )}
+                </div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={selectedUrls.size === discovered.items.length && discovered.items.length > 0}
+                    onChange={(e) => toggleAll(e.target.checked)}
+                  />
+                  Select all
+                </label>
+              </div>
+
+              <div className="max-h-96 overflow-y-auto border rounded-md divide-y">
+                {discovered.items.map((item) => (
+                  <label
+                    key={item.url}
+                    className="flex items-start gap-3 p-2 text-sm hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedUrls.has(item.url)}
+                      onChange={() => toggleUrl(item.url)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-mono text-xs text-gray-700">{item.url}</div>
+                      {item.alreadyExists && (
+                        <div className="text-xs text-amber-600">already in catalog — will re-scrape and update</div>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleScrapeSelected}
+                disabled={loading || selectedUrls.size === 0}
+                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading && results.length > 0
+                  ? `Scraping ${results.length} of ${selectedUrls.size}...`
+                  : `Scrape ${selectedUrls.size} selected`}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Results */}
       {results.length > 0 && (
         <div className="mt-6 space-y-2">
@@ -226,4 +412,3 @@ export default function ScraperClient() {
     </div>
   )
 }
-

@@ -41,16 +41,9 @@ export async function PATCH(
       altitude_max_m: typeof data.altitude_max_m === 'number' ? data.altitude_max_m : (data.altitude_max_m ? parseInt(data.altitude_max_m) : null),
       flavor_notes: flavorNotes,
       vendor_description: data.vendor_description || null,
+      cupping_notes: data.cupping_notes || null,
       roasting_notes: data.roasting_notes || null,
       recommended_roast_levels: Array.isArray(data.recommended_roast_levels) ? data.recommended_roast_levels : null,
-      body_intensity: (() => {
-        const value = typeof data.body_intensity === 'number' ? data.body_intensity : (data.body_intensity ? parseInt(data.body_intensity) : null)
-        return (value !== null && value >= 0 && value <= 5) ? value : null
-      })(),
-      acidity_intensity: (() => {
-        const value = typeof data.acidity_intensity === 'number' ? data.acidity_intensity : (data.acidity_intensity ? parseInt(data.acidity_intensity) : null)
-        return (value !== null && value >= 0 && value <= 5) ? value : null
-      })(),
       price_per_lb: typeof data.price_per_lb === 'number' ? data.price_per_lb : (data.price_per_lb ? parseFloat(data.price_per_lb) : null),
       arrival_date: data.arrival_date || null,
       screen_size: data.screen_size || null,

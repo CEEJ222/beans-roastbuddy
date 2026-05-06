@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { findVendorByUrl } from '@/lib/vendors'
 
 // ─── Step 1: Firecrawl fetches + renders the page ─────────────────────────────
 async function fetchMarkdownWithFirecrawl(url: string): Promise<string> {
@@ -150,8 +151,8 @@ export async function POST(request: NextRequest) {
     // Everything below this line is UNCHANGED from the original route
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Extract vendor from URL or data
-    const vendor = extractVendorFromUrl(url) || scrapedData.vendor || 'Unknown'
+    // Vendor: registry lookup → LLM-extracted fallback → 'Unknown'
+    const vendor = findVendorByUrl(url)?.name || scrapedData.vendor || 'Unknown'
 
     function extractNameFromUrl(url: string): string | null {
       try {
@@ -241,13 +242,6 @@ export async function POST(request: NextRequest) {
       if (!isNaN(parsed)) cuppingScore = parsed
     }
 
-    function normalizeIntensity(value: any): number | null {
-      if (value == null || value === '') return null
-      const num = typeof value === 'number' ? value : parseFloat(String(value))
-      if (isNaN(num) || num < 0 || num > 5) return null
-      return Math.round(num)
-    }
-
     const altitude = extractAltitude(scrapedData)
 
     const profileData: any = {
@@ -266,10 +260,9 @@ export async function POST(request: NextRequest) {
       altitude_max_m: altitude.max,
       flavor_notes: flavorNotes,
       vendor_description: getValue(scrapedData, 'vendor_description', 'description', 'product_description', 'details'),
+      cupping_notes: getValue(scrapedData, 'cupping_notes', 'cupping', 'tasting_notes'),
       roasting_notes: getValue(scrapedData, 'roasting_notes', 'roast_notes', 'roasting_recommendations'),
       recommended_roast_levels: recommendedRoastLevels,
-      body_intensity: normalizeIntensity(scrapedData.body_intensity),
-      acidity_intensity: normalizeIntensity(scrapedData.acidity_intensity),
       price_per_lb: pricePerLb ? parseFloat(String(pricePerLb).replace(/[^0-9.]/g, '')) : null,
       arrival_date: arrivalDate,
       screen_size: getValue(scrapedData, 'screen_size', 'screen', 'size'),
@@ -360,18 +353,6 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     )
-  }
-}
-
-function extractVendorFromUrl(url: string): string | null {
-  try {
-    const hostname = new URL(url).hostname
-    if (hostname.includes('captainscoffee')) return "The Captain's Coffee"
-    if (hostname.includes('burman')) return 'Burman Coffee Traders'
-    if (hostname.includes('sweetmarias')) return "Sweet Maria's"
-    return null
-  } catch {
-    return null
   }
 }
 

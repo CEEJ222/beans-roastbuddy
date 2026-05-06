@@ -19,10 +19,9 @@ interface CoffeeProfile {
   altitude_max_m: number | null
   flavor_notes: string[] | null
   vendor_description: string | null
+  cupping_notes: string | null
   roasting_notes: string | null
   recommended_roast_levels: string[] | null
-  body_intensity: number | null
-  acidity_intensity: number | null
   price_per_lb: number | null
   arrival_date: string | null
   screen_size: string | null

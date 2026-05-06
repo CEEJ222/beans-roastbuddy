@@ -32,10 +32,9 @@ export default function BeanDetailModal({
     altitude_max_m: profile.altitude_max_m?.toString() || '',
     flavor_notes: (profile.flavor_notes || []).join(', '),
     vendor_description: profile.vendor_description || '',
+    cupping_notes: profile.cupping_notes || '',
     roasting_notes: profile.roasting_notes || '',
     recommended_roast_levels: profile.recommended_roast_levels || [],
-    body_intensity: profile.body_intensity?.toString() || '',
-    acidity_intensity: profile.acidity_intensity?.toString() || '',
     price_per_lb: profile.price_per_lb?.toString() || '',
     arrival_date: profile.arrival_date ? profile.arrival_date.split('T')[0] : '',
     screen_size: profile.screen_size || '',
@@ -66,8 +65,6 @@ export default function BeanDetailModal({
         vendor_description: profile.vendor_description || '',
         roasting_notes: profile.roasting_notes || '',
         recommended_roast_levels: profile.recommended_roast_levels || [],
-        body_intensity: profile.body_intensity?.toString() || '',
-        acidity_intensity: profile.acidity_intensity?.toString() || '',
         price_per_lb: profile.price_per_lb?.toString() || '',
         arrival_date: profile.arrival_date ? profile.arrival_date.split('T')[0] : '',
         screen_size: profile.screen_size || '',
@@ -102,14 +99,6 @@ export default function BeanDetailModal({
         flavor_notes: formData.flavor_notes ? formData.flavor_notes.split(',').map((n: string) => n.trim()).filter(Boolean) : [],
         altitude_min_m: formData.altitude_min_m ? parseInt(formData.altitude_min_m) : null,
         altitude_max_m: formData.altitude_max_m ? parseInt(formData.altitude_max_m) : null,
-        body_intensity: formData.body_intensity ? (() => {
-          const num = parseInt(formData.body_intensity)
-          return (num >= 0 && num <= 5) ? num : null
-        })() : null,
-        acidity_intensity: formData.acidity_intensity ? (() => {
-          const num = parseInt(formData.acidity_intensity)
-          return (num >= 0 && num <= 5) ? num : null
-        })() : null,
         price_per_lb: formData.price_per_lb ? parseFloat(formData.price_per_lb) : null,
         cupping_score: formData.cupping_score ? parseFloat(formData.cupping_score) : null,
         arrival_date: formData.arrival_date || null,
@@ -155,8 +144,6 @@ export default function BeanDetailModal({
       vendor_description: profile.vendor_description || '',
       roasting_notes: profile.roasting_notes || '',
       recommended_roast_levels: profile.recommended_roast_levels || [],
-      body_intensity: profile.body_intensity?.toString() || '',
-      acidity_intensity: profile.acidity_intensity?.toString() || '',
       price_per_lb: profile.price_per_lb?.toString() || '',
       arrival_date: profile.arrival_date ? profile.arrival_date.split('T')[0] : '',
       screen_size: profile.screen_size || '',
@@ -511,40 +498,6 @@ export default function BeanDetailModal({
           <CardTitle className="text-base">Tasting Profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Body Intensity (0-5)</label>
-            {editing ? (
-              <Input
-                type="number"
-                min="0"
-                max="5"
-                step="1"
-                value={formData.body_intensity}
-                onChange={(e) => setFormData({ ...formData, body_intensity: e.target.value })}
-                placeholder="0-5"
-                className="w-full"
-              />
-            ) : (
-              <div>{profile.body_intensity !== null ? `${profile.body_intensity}/5` : 'N/A'}</div>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Acidity Intensity (0-5)</label>
-            {editing ? (
-              <Input
-                type="number"
-                min="0"
-                max="5"
-                step="1"
-                value={formData.acidity_intensity}
-                onChange={(e) => setFormData({ ...formData, acidity_intensity: e.target.value })}
-                placeholder="0-5"
-                className="w-full"
-              />
-            ) : (
-              <div>{profile.acidity_intensity !== null ? `${profile.acidity_intensity}/5` : 'N/A'}</div>
-            )}
-          </div>
         </CardContent>
       </Card>
 
@@ -574,19 +527,19 @@ export default function BeanDetailModal({
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Farm Notes
+              Cupping Notes
             </label>
             {editing ? (
               <textarea
-                value={formData.vendor_description}
-                onChange={(e) => setFormData({ ...formData, vendor_description: e.target.value })}
-                placeholder="Vendor description"
+                value={formData.cupping_notes ?? ''}
+                onChange={(e) => setFormData({ ...formData, cupping_notes: e.target.value })}
+                placeholder="Detailed tasting / cup analysis"
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
               />
             ) : (
               <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {profile.vendor_description || 'None'}
+                {profile.cupping_notes || 'None'}
               </p>
             )}
           </div>

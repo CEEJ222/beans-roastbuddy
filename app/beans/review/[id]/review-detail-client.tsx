@@ -20,10 +20,9 @@ interface CoffeeProfile {
   altitude_max_m: number | null
   flavor_notes: string[] | null
   vendor_description: string | null
+  cupping_notes: string | null
   roasting_notes: string | null
   recommended_roast_levels: string[] | null
-  body_intensity: number | null
-  acidity_intensity: number | null
   price_per_lb: number | null
   arrival_date: string | null
   screen_size: string | null
@@ -55,10 +54,9 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
     altitude_max_m: profile.altitude_max_m?.toString() || '',
     flavor_notes: (profile.flavor_notes || []).join(', '),
     vendor_description: profile.vendor_description || '',
+    cupping_notes: profile.cupping_notes || '',
     roasting_notes: profile.roasting_notes || '',
     recommended_roast_levels: profile.recommended_roast_levels || [],
-    body_intensity: profile.body_intensity?.toString() || '',
-    acidity_intensity: profile.acidity_intensity?.toString() || '',
     price_per_lb: profile.price_per_lb?.toString() || '',
     arrival_date: profile.arrival_date || '',
     screen_size: profile.screen_size || '',
@@ -81,14 +79,6 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
         flavor_notes: formData.flavor_notes ? formData.flavor_notes.split(',').map((n: string) => n.trim()).filter(Boolean) : [],
         altitude_min_m: formData.altitude_min_m ? parseInt(formData.altitude_min_m) : null,
         altitude_max_m: formData.altitude_max_m ? parseInt(formData.altitude_max_m) : null,
-        body_intensity: formData.body_intensity ? (() => {
-          const num = parseInt(formData.body_intensity)
-          return (num >= 0 && num <= 5) ? num : null
-        })() : null,
-        acidity_intensity: formData.acidity_intensity ? (() => {
-          const num = parseInt(formData.acidity_intensity)
-          return (num >= 0 && num <= 5) ? num : null
-        })() : null,
         price_per_lb: formData.price_per_lb ? parseFloat(formData.price_per_lb) : null,
         cupping_score: formData.cupping_score ? parseFloat(formData.cupping_score) : null,
         arrival_date: formData.arrival_date || null,
@@ -342,18 +332,6 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
                   className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-50"
                 />
               </div>
-              <div>
-                <label className="flex items-center space-x-2 mt-6">
-                  <input
-                    type="checkbox"
-                    checked={formData.espresso_suitable}
-                    onChange={(e) => setFormData({ ...formData, espresso_suitable: e.target.checked })}
-                    disabled={!editing}
-                    className="rounded border-gray-300"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Espresso Suitable</span>
-                </label>
-              </div>
             </div>
 
             {/* Flavor Notes */}
@@ -374,11 +352,11 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
             {/* Descriptions */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Farm Notes
+                Cupping Notes
               </label>
               <textarea
-                value={formData.vendor_description}
-                onChange={(e) => setFormData({ ...formData, vendor_description: e.target.value })}
+                value={formData.cupping_notes ?? ''}
+                onChange={(e) => setFormData({ ...formData, cupping_notes: e.target.value })}
                 disabled={!editing}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-50"
@@ -435,48 +413,6 @@ export default function ReviewDetailClient({ profile }: { profile: CoffeeProfile
                     </span>
                   </label>
                 ))}
-              </div>
-            </div>
-
-            {/* Body and Acidity Intensity */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Body Intensity (0-5)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="1"
-                  value={formData.body_intensity}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? '' : e.target.value
-                    setFormData({ ...formData, body_intensity: value })
-                  }}
-                  disabled={!editing}
-                  placeholder="0-5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Acidity Intensity (0-5)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="1"
-                  value={formData.acidity_intensity}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? '' : e.target.value
-                    setFormData({ ...formData, acidity_intensity: value })
-                  }}
-                  disabled={!editing}
-                  placeholder="0-5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-50"
-                />
               </div>
             </div>
 
