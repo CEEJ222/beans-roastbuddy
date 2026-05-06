@@ -13,8 +13,10 @@ async function fetchMarkdownWithFirecrawl(url: string): Promise<string> {
     body: JSON.stringify({
       url,
       formats: ['markdown'],
-      onlyMainContent: true,  // strips nav/footer/sidebar noise
-      waitFor: 2000,          // handles JS-rendered content (Sweet Maria's etc.)
+      // Disabled: Shopify-style spec accordions on Bodhi Leaf / Showroom
+      // were being stripped as "non-main content". LLM filters the noise.
+      onlyMainContent: false,
+      waitFor: 5000,
     }),
   })
 
