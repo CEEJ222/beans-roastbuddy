@@ -38,11 +38,6 @@ export const VENDORS: Vendor[] = [
     productUrlPattern: /^https?:\/\/(?:www\.)?bodhileafcoffee\.com\/(?:collections\/[^/]+\/)?products\/[^/?#]+/i,
   },
   {
-    name: 'Showroom Coffee',
-    hostnames: ['showroomcoffee.com'],
-    productUrlPattern: /^https?:\/\/(?:www\.)?showroomcoffee\.com\/(?:collections\/[^/]+\/)?products\/[^/?#]+/i,
-  },
-  {
     name: 'Mill City Roasters',
     hostnames: ['millcityroasters.com'],
     productUrlPattern: /^https?:\/\/(?:www\.)?millcityroasters\.com\/shop\/[^/?#]+/i,

@@ -13,7 +13,7 @@ async function fetchMarkdownWithFirecrawl(url: string): Promise<string> {
     body: JSON.stringify({
       url,
       formats: ['markdown'],
-      // Disabled: Shopify-style spec accordions on Bodhi Leaf / Showroom
+      // Disabled: Shopify-style spec accordions (e.g. Bodhi Leaf)
       // were being stripped as "non-main content". LLM filters the noise.
       onlyMainContent: false,
       waitFor: 5000,
